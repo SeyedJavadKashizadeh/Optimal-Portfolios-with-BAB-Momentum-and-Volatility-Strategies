@@ -3,7 +3,9 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 import os
+from numba import njit
 
+@njit
 def cov_numba(Rn_e, Rm_e, window=60, min_periods=36):
     n = len(Rn_e)
     beta = np.full(n, np.nan)
@@ -54,6 +56,7 @@ def beta_calculator(data, parquet_path='beta_chunks.parquet', window=60, min_per
         group = group.sort_values(by='date')
         Rn = np.ascontiguousarray(group['Rn_e'].values, dtype=np.float64)
         Rm = np.ascontiguousarray(group['Rm_e'].values, dtype=np.float64)
+
         beta_vals = cov_numba(Rn, Rm)
 
         beta_df = group[['permno', 'date']].copy()

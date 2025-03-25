@@ -17,12 +17,13 @@ import BAB
 import plots
 import momentum
 import idio_vol
+import CAPM_stats
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 #---------------------------------------------
-# Downloading Data
+# Downloading Data (Run this block only once)
 #---------------------------------------------
 """
 db=wrds.Connection(wrds_username='javadkashizadeh')
@@ -50,25 +51,28 @@ data.to_csv('raw_data.csv', sep=';', index=False)
 #-------------------------------------------------------
 project_path = 'G:/My Drive/EPFL/first_year/semester3/Investment/project'
 
-raw_data = pd.read_csv("raw_data.csv",sep=";",nrows=10000)
-sic_data = pd.read_csv("sic_data.csv",sep=";",nrows=10000)
+raw_data = pd.read_csv("raw_data.csv",sep=";")
+sic_data = pd.read_csv("sic_data.csv",sep=";")
 
 data = raw_data.copy()
+a = time.time()
 data = rolling_beta.beta_calculator(data, parquet_path=f'{project_path}/beta_parquet.parquet')
-
+b= time.time()
+print(f'Rolling Beta Calculation took {b-a: 0.2f} seconds')
 #----------------------------------------------------
 # Betting Against Beta (Frazzini & Pedersen (2014))
 #----------------------------------------------------
 BAB_dataset = data.copy()
 BAB_dataset, BAB_factor = BAB.bab_return(BAB_dataset)
 plots.signal_returns(BAB_factor, 'date', 'BAB_return', 'BAB Factor (Frazzini & Pedersen (2014))', 'Value Weighted', saving_path=f'{project_path}/BAB.png')
-
+CAPM_stats.statistics(BAB_factor, 'BAB_return', BAB_dataset)
 #--------------------------------------------------------
 # Momentum Strategy (Jegadeesh & Titman (1993))
 #---------------------------------------------------------
 mom_dataset = data.copy()
 mom_factor = momentum.mom_return(mom_dataset)
 plots.signal_returns(mom_factor, 'date', 'MOM_return', 'Momentum Factor (Jegadeesh & Titman (1993))', 'Value Weighted', saving_path=f'{project_path}/momentum.png')
+CAPM_stats.statistics(mom_factor, 'MOM_return', mom_dataset)
 
 #--------------------------------------------------------
 # Idiosyncratic Strategy (Ang, Hodrick, Xing, and Zhang (2006))
@@ -76,3 +80,4 @@ plots.signal_returns(mom_factor, 'date', 'MOM_return', 'Momentum Factor (Jegadee
 idio_vol_dataset = data.copy()
 idio_vol_factor = idio_vol.ivol_return(idio_vol_dataset)
 plots.signal_returns(idio_vol_factor, 'date', 'IVOL_return', 'Idiosyncratic Factor (Ang, Hodrick, Xing, and Zhang (2006))', 'Value Weighted', saving_path=f'{project_path}/idio_vol.png')
+CAPM_stats.statistics(idio_vol_factor, 'IVOL_return', idio_vol_dataset)
