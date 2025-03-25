@@ -27,6 +27,23 @@ def market_ret(db):
 
     return Rm.rename(columns={'vwretd': 'Rm'})
 
+def sic_data(db):
+    sic_data = db.raw_sql(f"""
+        SELECT a.permno, a.date, 
+               c.siccd
+        FROM crsp.msf AS a
+        LEFT JOIN crsp.msenames AS b
+        ON a.permno = b.permno
+        AND b.namedt <= a.date
+        AND a.date <= b.nameendt
+        LEFT JOIN crsp.stocknames AS c
+        ON a.permno = c.permno
+        WHERE a.date BETWEEN '01/01/1964' AND '{today}'
+        AND b.exchcd BETWEEN 1 AND 2
+        AND b.shrcd BETWEEN 10 AND 11
+    """, date_cols=['date'])
+
+    return sic_data
 
 def stock_data(db):
     stock_data = db.raw_sql(f"""
@@ -45,7 +62,7 @@ def stock_data(db):
           and b.shrcd between 10 and 11
     """, date_cols=['date'])
 
-    stock_data = stock_data.drop_duplicates(subset=['permno', 'date'], keep='last')
+
     stock_data = stock_data.drop(['shrcd', 'exchcd'], axis=1)
     stock_data = stock_data.rename(columns={'ret': 'Rn'})
     stock_data['mcap'] = np.abs(stock_data['prc']) * stock_data['shrout']
