@@ -15,13 +15,15 @@ import loading_data
 import rolling_beta
 import BAB
 import plots
+import momentum
+
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 #---------------------------------------------
 # Downloading Data
 #---------------------------------------------
-
+"""
 db=wrds.Connection(wrds_username='javadkashizadeh')
 
 # Load data
@@ -41,14 +43,14 @@ data['Rn_e'] = data['Rn'] - data['rf']
 data['Rm_e'] = data['Rm'] - data['rf']
 # Export
 data.to_csv('raw_data.csv', sep=';', index=False)
-
+"""
 #-------------------------------------------------------
 # Rolling Beta Using Numba for Loop and Parquet Saving
 #-------------------------------------------------------
 project_path = 'G:/My Drive/EPFL/first_year/semester3/Investment/project'
 
-raw_data = pd.read_csv("raw_data.csv",sep=";")
-sic_data = pd.read_csv("sic_data.csv",sep=";")
+raw_data = pd.read_csv("raw_data.csv",sep=";",nrows=10000)
+sic_data = pd.read_csv("sic_data.csv",sep=";",nrows=10000)
 
 data = raw_data.copy()
 data = rolling_beta.beta_calculator(data, parquet_path=f'{project_path}/beta_parquet.parquet')
@@ -58,5 +60,10 @@ data = rolling_beta.beta_calculator(data, parquet_path=f'{project_path}/beta_par
 #----------------------------------------------------
 
 BAB_dataset = data.copy()
-BAB_dataset, BAB_return = BAB.bab_return(BAB_dataset)
-plots.signal_returns(BAB_return, 'date', 'BAB_return', 'BAB Factor (Frazzini & Pedersen (2014))', 'BAB (Value Weighted)', saving_path=f'{project_path}/BAB.png')
+BAB_dataset, BAB_factor = BAB.bab_return(BAB_dataset)
+plots.signal_returns(BAB_factor, 'date', 'BAB_return', 'BAB Factor (Frazzini & Pedersen (2014))', 'Value Weighted', saving_path=f'{project_path}/BAB.png')
+
+mom_dataset = data.copy()
+mom_factor = momentum.mom_return(mom_dataset)
+plots.signal_returns(mom_factor, 'date', 'MOM_return', 'Momentum Factor (Jegadeesh & Titman (1993))', 'Value Weighted', saving_path=f'{project_path}/momentum.png')
+
