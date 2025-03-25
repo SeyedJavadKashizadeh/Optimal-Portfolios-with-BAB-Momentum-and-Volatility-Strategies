@@ -1,7 +1,5 @@
 import pandas as pd
-import numba as nb
 import numpy as np
-import time
 import pyarrow as pa
 import pyarrow.parquet as pq
 import os
@@ -38,10 +36,6 @@ def cov_numba(Rn_e, Rm_e, window=60, min_periods=36):
             if var != 0:
                 beta[i] = cov / var
     return beta
-
-import pyarrow as pa
-import pyarrow.parquet as pq
-import os
 
 def beta_calculator(data, parquet_path='beta_chunks.parquet', window=60, min_periods=36):
     data = data.copy()
