@@ -16,6 +16,7 @@ import rolling_beta
 import BAB
 import plots
 import momentum
+import idio_vol
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -58,12 +59,20 @@ data = rolling_beta.beta_calculator(data, parquet_path=f'{project_path}/beta_par
 #----------------------------------------------------
 # Betting Against Beta (Frazzini & Pedersen (2014))
 #----------------------------------------------------
-
 BAB_dataset = data.copy()
 BAB_dataset, BAB_factor = BAB.bab_return(BAB_dataset)
 plots.signal_returns(BAB_factor, 'date', 'BAB_return', 'BAB Factor (Frazzini & Pedersen (2014))', 'Value Weighted', saving_path=f'{project_path}/BAB.png')
 
+#--------------------------------------------------------
+# Momentum Strategy (Jegadeesh & Titman (1993))
+#---------------------------------------------------------
 mom_dataset = data.copy()
 mom_factor = momentum.mom_return(mom_dataset)
 plots.signal_returns(mom_factor, 'date', 'MOM_return', 'Momentum Factor (Jegadeesh & Titman (1993))', 'Value Weighted', saving_path=f'{project_path}/momentum.png')
 
+#--------------------------------------------------------
+# Idiosyncratic Strategy (Ang, Hodrick, Xing, and Zhang (2006))
+#---------------------------------------------------------
+idio_vol_dataset = data.copy()
+idio_vol_factor = idio_vol.ivol_return(idio_vol_dataset)
+plots.signal_returns(idio_vol_factor, 'date', 'IVOL_return', 'Idiosyncratic Factor (Ang, Hodrick, Xing, and Zhang (2006))', 'Value Weighted', saving_path=f'{project_path}/idio_vol.png')

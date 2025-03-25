@@ -1,0 +1,15 @@
+# Use LF for all text files
+* text=auto eol=lf
+
+# Common text file types (adjust if needed)
+*.py    text eol=lf
+*.xml   text eol=lf
+*.json  text eol=lf
+*.csv   text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+
+# Don't touch binary files
+*.png   binary
+*.jpg   binary
+*.pdf   binary
