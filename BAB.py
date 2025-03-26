@@ -29,4 +29,4 @@ def bab_return(data):
     # Strategy weights
     data['BAB_Weights'] = data['w_L'] / data['beta_L_BAB'] - data['w_H'] / data['beta_H_BAB']
 
-    return data, BAB
+    return data, BAB[['date','BAB_return']]

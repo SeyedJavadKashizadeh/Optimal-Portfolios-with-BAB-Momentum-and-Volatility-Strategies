@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import wrds
 import time
+import importlib
 
 #  user-written modules
 import loading_data
@@ -18,6 +19,8 @@ import plots
 import momentum
 import idio_vol
 import CAPM_stats
+import optimal_fund
+importlib.reload(optimal_fund)
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -59,6 +62,8 @@ a = time.time()
 data = rolling_beta.beta_calculator(data, parquet_path=f'{project_path}/beta_parquet.parquet')
 b= time.time()
 print(f'Rolling Beta Calculation took {b-a: 0.2f} seconds')
+data = data.dropna(subset=['beta'])
+
 #----------------------------------------------------
 # Betting Against Beta (Frazzini & Pedersen (2014))
 #----------------------------------------------------
@@ -74,10 +79,15 @@ mom_factor = momentum.mom_return(mom_dataset)
 plots.signal_returns(mom_factor, 'date', 'MOM_return', 'Momentum Factor (Jegadeesh & Titman (1993))', 'Value Weighted', saving_path=f'{project_path}/momentum.png')
 CAPM_stats.statistics(mom_factor, 'MOM_return', mom_dataset)
 
-#--------------------------------------------------------
+#--------------------------------------------------------------
 # Idiosyncratic Strategy (Ang, Hodrick, Xing, and Zhang (2006))
-#---------------------------------------------------------
+#--------------------------------------------------------------
 idio_vol_dataset = data.copy()
 idio_vol_factor = idio_vol.ivol_return(idio_vol_dataset)
-plots.signal_returns(idio_vol_factor, 'date', 'IVOL_return', 'Idiosyncratic Factor (Ang, Hodrick, Xing, and Zhang (2006))', 'Value Weighted', saving_path=f'{project_path}/idio_vol.png')
+plots.signal_returns(idio_vol_factor, 'date', 'IVOL_return', 'Idiosyncratic Volatility Factor (Ang, Hodrick, Xing, and Zhang (2006))', 'Value Weighted', saving_path=f'{project_path}/idio_vol.png')
 CAPM_stats.statistics(idio_vol_factor, 'IVOL_return', idio_vol_dataset)
+
+#--------------------------------------------------------------
+# Optimal Fund Portfolio
+#--------------------------------------------------------------
+fund_portfolio = optimal_fund.fund_return(BAB_factor,mom_factor,idio_vol_factor)
