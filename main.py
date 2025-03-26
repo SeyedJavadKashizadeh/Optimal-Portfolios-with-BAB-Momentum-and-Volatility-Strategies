@@ -91,4 +91,4 @@ CAPM_stats.factor_statistics(idio_vol_factor, 'IVOL_return', idio_vol_dataset)
 # Optimal Fund Portfolio
 #--------------------------------------------------------------
 fund_portfolio = optimal_fund.fund_return(BAB_factor,mom_factor,idio_vol_factor)
-
+CAPM_stats.fund_statistics(fund_portfolio)
