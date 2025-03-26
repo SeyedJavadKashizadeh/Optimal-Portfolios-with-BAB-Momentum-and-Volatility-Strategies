@@ -63,7 +63,7 @@ def fund_return(BAB_factor,mom_factor,idio_vol_factor):
     mean_var = mean_variance(fund_portfolio)
     fund_portfolio = fund_portfolio.merge(mean_var[['mv_return','date']], on='date', how='inner')
 
-    annual_volatility = fund_portfolio[['BAB_return', 'MOM_return', 'IVOL_return']].std() * np.sqrt(12)
+    annual_volatility = fund_portfolio[['equal_return', 'rp_return', 'mv_return']].std() * np.sqrt(12)
     target_volatility = 0.1
     multipliers = target_volatility / annual_volatility
     adj_ret = fund_portfolio[['equal_return', 'rp_return', 'mv_return']].mul(multipliers, axis=1)

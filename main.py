@@ -70,14 +70,14 @@ data = data.dropna(subset=['beta'])
 BAB_dataset = data.copy()
 BAB_dataset, BAB_factor = BAB.bab_return(BAB_dataset)
 plots.signal_returns(BAB_factor, 'date', 'BAB_return', 'BAB Factor (Frazzini & Pedersen (2014))', 'Value Weighted', saving_path=f'{project_path}/BAB.png')
-CAPM_stats.statistics(BAB_factor, 'BAB_return', BAB_dataset)
+CAPM_stats.factor_statistics(BAB_factor, 'BAB_return', BAB_dataset)
 #--------------------------------------------------------
 # Momentum Strategy (Jegadeesh & Titman (1993))
 #---------------------------------------------------------
 mom_dataset = data.copy()
 mom_factor = momentum.mom_return(mom_dataset)
 plots.signal_returns(mom_factor, 'date', 'MOM_return', 'Momentum Factor (Jegadeesh & Titman (1993))', 'Value Weighted', saving_path=f'{project_path}/momentum.png')
-CAPM_stats.statistics(mom_factor, 'MOM_return', mom_dataset)
+CAPM_stats.factor_statistics(mom_factor, 'MOM_return', mom_dataset)
 
 #--------------------------------------------------------------
 # Idiosyncratic Strategy (Ang, Hodrick, Xing, and Zhang (2006))
@@ -85,7 +85,7 @@ CAPM_stats.statistics(mom_factor, 'MOM_return', mom_dataset)
 idio_vol_dataset = data.copy()
 idio_vol_factor = idio_vol.ivol_return(idio_vol_dataset)
 plots.signal_returns(idio_vol_factor, 'date', 'IVOL_return', 'Idiosyncratic Volatility Factor (Ang, Hodrick, Xing, and Zhang (2006))', 'Value Weighted', saving_path=f'{project_path}/idio_vol.png')
-CAPM_stats.statistics(idio_vol_factor, 'IVOL_return', idio_vol_dataset)
+CAPM_stats.factor_statistics(idio_vol_factor, 'IVOL_return', idio_vol_dataset)
 
 #--------------------------------------------------------------
 # Optimal Fund Portfolio
