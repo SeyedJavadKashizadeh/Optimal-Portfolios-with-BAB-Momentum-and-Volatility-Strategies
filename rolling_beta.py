@@ -4,6 +4,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import os
 from numba import njit
+import concurrent.futures
+
 
 @njit
 def cov_numba(Rn_e, Rm_e, window=60, min_periods=36):
@@ -39,7 +41,17 @@ def cov_numba(Rn_e, Rm_e, window=60, min_periods=36):
                 beta[i] = cov / var
     return beta
 
+def process_one_permno(group):
+    group = group.sort_values('date')
+    Rn = np.ascontiguousarray(group['Rn_e'].values, dtype=np.float64)
+    Rm = np.ascontiguousarray(group['Rm_e'].values, dtype=np.float64)
+    beta_vals = cov_numba(Rn, Rm)
+    beta_df = group[['permno', 'date']].copy()
+    beta_df['beta'] = beta_vals
+    return beta_df
+
 def beta_calculator(data, parquet_path='beta_chunks.parquet', window=60, min_periods=36):
+
     data = data.copy()
     data['date'] = pd.to_datetime(data['date'])
     data = data.sort_values(by=['permno', 'date'])
@@ -47,44 +59,39 @@ def beta_calculator(data, parquet_path='beta_chunks.parquet', window=60, min_per
     data['N'] = data.groupby('permno')['date'].transform('count')
     data = data[data['N'] > 35]
 
-    # Prepare Parquet writer
+    grouped = list(data.groupby('permno'))
+
+    # Clean previous output file
     if os.path.exists(parquet_path):
-        os.remove(parquet_path)  # clean previous file
+        os.remove(parquet_path)
+
+    num_threads = 2
+
+    print("Computing betas in parallel...")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        results = executor.map(lambda g: process_one_permno(g[1]), grouped)
+
+
     pqwriter = None
 
-    for counter, (permno, group) in enumerate(data.groupby('permno'), 1):
-        group = group.sort_values(by='date')
-        Rn = np.ascontiguousarray(group['Rn_e'].values, dtype=np.float64)
-        Rm = np.ascontiguousarray(group['Rm_e'].values, dtype=np.float64)
-
-        beta_vals = cov_numba(Rn, Rm)
-
-        beta_df = group[['permno', 'date']].copy()
-        beta_df['beta'] = beta_vals
-
+    for counter, beta_df in enumerate(results, 1):
         table = pa.Table.from_pandas(beta_df)
         if pqwriter is None:
             pqwriter = pq.ParquetWriter(parquet_path, table.schema)
         pqwriter.write_table(table)
-
         if counter % 1000 == 0:
-            print(f" {counter} stocks processed")
+            print(f" {counter} beta blocks written")
 
     if pqwriter:
         pqwriter.close()
 
-    # Now load the full beta DataFrame from the Parquet file
+    # ---- Step 3: Merge with original data and calculate alpha ----
     beta_n = pd.read_parquet(parquet_path)
-
-    # Continue as before
-    data['date'] = pd.to_datetime(data['date'])
-    beta_n['date'] = pd.to_datetime(beta_n['date'])
     data = pd.merge(data, beta_n, on=['permno', 'date'], how='left')
     data['beta'] = data.groupby('permno')['beta'].shift(1)
     data['beta_original'] = data['beta']
     data['beta'] = data['beta'].clip(data['beta'].quantile(0.05), data['beta'].quantile(0.95))
 
-    # Compute rolling means
     Rn_e_mean = data.set_index('date').groupby('permno')['Rn_e'].rolling(window, min_periods=min_periods).mean().reset_index()
     Rm_e_mean = data.set_index('date').groupby('permno')['Rm_e'].rolling(window, min_periods=min_periods).mean().reset_index()
     Rn_e_mean['Rn_e'] = Rn_e_mean.groupby('permno')['Rn_e'].shift(1)
@@ -92,9 +99,8 @@ def beta_calculator(data, parquet_path='beta_chunks.parquet', window=60, min_per
     Rn_e_mean = Rn_e_mean.rename(columns={'Rn_e': 'Rn_e_mean'})
     Rm_e_mean = Rm_e_mean.rename(columns={'Rm_e': 'Rm_e_mean'})
 
-    # Merge rolling means
     data = pd.merge(data, Rn_e_mean, on=['permno', 'date'], how='left')
     data = pd.merge(data, Rm_e_mean, on=['permno', 'date'], how='left')
-
     data['alpha'] = data['Rn_e_mean'] - (data['beta'] * data['Rm_e_mean'])
+
     return data
