@@ -28,7 +28,7 @@ pd.set_option('display.max_rows', None)
 #---------------------------------------------
 # Downloading Data (Run this block only once)
 #---------------------------------------------
-"""
+
 db=wrds.Connection(wrds_username='javadkashizadeh')
 
 # Load data
@@ -48,7 +48,7 @@ data['Rn_e'] = data['Rn'] - data['rf']
 data['Rm_e'] = data['Rm'] - data['rf']
 # Export
 data.to_csv('raw_data.csv', sep=';', index=False)
-"""
+
 #-------------------------------------------------------
 # Rolling Beta Using Numba for Loop and Parquet Saving
 #-------------------------------------------------------

@@ -23,8 +23,8 @@ def ivol_return(data):
     df['vw'] = df.groupby(['date', 'ivol_rank'])['mcap'].transform(lambda x: x / x.sum())
     df['weighted_ret'] = df['Rn'] * df['vw']
     dec_ret = df.groupby(['date', 'ivol_rank'], group_keys=False)['weighted_ret'].sum().reset_index(name='ret_vw')
-    long = dec_ret[dec_ret['ivol_rank'] <= 3].groupby('date')['ret_vw'].mean()
-    short = dec_ret[dec_ret['ivol_rank'] >= 8].groupby('date')['ret_vw'].mean()
+    short = dec_ret[dec_ret['ivol_rank'] <= 3].groupby('date')['ret_vw'].mean()
+    long = dec_ret[dec_ret['ivol_rank'] >= 8].groupby('date')['ret_vw'].mean()
     ivol_vw = (long - short).reset_index(name='IVOL_return')
 
     return ivol_vw

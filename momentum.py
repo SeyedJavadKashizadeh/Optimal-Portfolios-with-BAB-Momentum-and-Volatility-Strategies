@@ -16,3 +16,4 @@ def mom_return(data):
     MOM_return = (long - short).reset_index(name='MOM_return')
 
     return MOM_return
+
