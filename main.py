@@ -19,7 +19,6 @@ import momentum
 import idio_vol
 import CAPM_stats
 import optimal_fund
-importlib.reload(optimal_fund)
 
 #---------------------------------------------
 # Downloading Data (Run this block only once)
