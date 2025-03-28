@@ -46,7 +46,7 @@ def factor_statistics(factor_df, factor_return, market_df, market_return='Rm_e',
 
 
 def fund_statistics(data):
-    strategies = ['equal_return', 'rp_return', 'mv_return']
+    strategies = ['equal_return', 'rp_return']
     metrics = {
         'Mean': [],
         'Target Volatility': [],

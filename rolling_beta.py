@@ -6,7 +6,7 @@ import os
 from numba import njit
 import concurrent.futures
 
-
+"""
 @njit
 def cov_numba(Rn_e, Rm_e, window=60, min_periods=36):
     n = len(Rn_e)
@@ -87,6 +87,39 @@ def beta_calculator(data, parquet_path='beta_chunks.parquet', window=60, min_per
 
     # ---- Step 3: Merge with original data and calculate alpha ----
     beta_n = pd.read_parquet(parquet_path)
+    data = pd.merge(data, beta_n, on=['permno', 'date'], how='left')
+    data['beta'] = data.groupby('permno')['beta'].shift(1)
+    data['beta_original'] = data['beta']
+    data['beta'] = data['beta'].clip(data['beta'].quantile(0.05), data['beta'].quantile(0.95))
+
+    Rn_e_mean = data.set_index('date').groupby('permno')['Rn_e'].rolling(window, min_periods=min_periods).mean().reset_index()
+    Rm_e_mean = data.set_index('date').groupby('permno')['Rm_e'].rolling(window, min_periods=min_periods).mean().reset_index()
+    Rn_e_mean['Rn_e'] = Rn_e_mean.groupby('permno')['Rn_e'].shift(1)
+    Rm_e_mean['Rm_e'] = Rm_e_mean.groupby('permno')['Rm_e'].shift(1)
+    Rn_e_mean = Rn_e_mean.rename(columns={'Rn_e': 'Rn_e_mean'})
+    Rm_e_mean = Rm_e_mean.rename(columns={'Rm_e': 'Rm_e_mean'})
+
+    data = pd.merge(data, Rn_e_mean, on=['permno', 'date'], how='left')
+    data = pd.merge(data, Rm_e_mean, on=['permno', 'date'], how='left')
+    data['alpha'] = data['Rn_e_mean'] - (data['beta'] * data['Rm_e_mean'])
+
+    return data
+"""
+
+# Simple and more Efficient
+def calculate_beta(data, window =60, min_periods=36):
+
+    data['date'] = pd.to_datetime(data['date'])  # Ensure that "date" is in datetime format
+    data = data.sort_values(by=['permno', 'date'], ascending=[True, True]).copy()
+    data = data.dropna(subset=['mcap_l', 'Rn_e', 'Rm_e']).copy()
+
+    data['N'] = data.groupby(['permno'])['date'].transform('count')
+    data = data[data['N'] >= min_periods ].copy()
+
+    cov_nm = data.set_index('date').groupby('permno')[['Rn_e', 'Rm_e']].rolling(window, min_periods=36).cov()
+    beta_n = (cov_nm.iloc[0::2, 1].droplevel(2) / cov_nm.iloc[1::2, 1].droplevel(2))
+    beta_n = beta_n.dropna().reset_index().rename(columns={'Rm_e': 'beta'})
+
     data = pd.merge(data, beta_n, on=['permno', 'date'], how='left')
     data['beta'] = data.groupby('permno')['beta'].shift(1)
     data['beta_original'] = data['beta']

@@ -30,7 +30,8 @@ def market_ret(db):
 def sic_data(db):
     sic_data = db.raw_sql(f"""
         SELECT a.permno, a.date, 
-               c.siccd
+               c.siccd,
+                c.comnam
         FROM crsp.msf AS a
         LEFT JOIN crsp.msenames AS b
         ON a.permno = b.permno
