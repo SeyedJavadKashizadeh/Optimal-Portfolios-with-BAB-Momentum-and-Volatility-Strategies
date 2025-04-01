@@ -17,8 +17,8 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project:
-This project builds an optimal long-short portfolio based on three empirical asset pricing strategies; Betting Against Beta (BAB), Momentum, and Idiosyncratic Volatility. 
-Using daily U.S. equity data from CRSP via WRDS (1970–2025), the portfolio is constructed using both equal-weighted and risk parity. The final fund targets a volatility of 10%.
+This project builds an optimal long-short satellite portfolio based on three empirical asset pricing strategies; Betting Against Beta (BAB), Momentum, and Idiosyncratic Volatility. 
+Using daily U.S. equity data from CRSP via WRDS (1970–2025), the portfolio is constructed using both equal-weighted and risk parity. The final fund targets a volatility of 10%. 
 
 <!-- Data -->
 ## Data:
@@ -161,7 +161,7 @@ This strategy examines whether stocks with lower idiosyncratic volatility outper
 <!-- OPTIMAL FUND PORTFOLIO -->
 ## Optimal Fund Portfolio Return (STRAT):
 
-I construct a fund that combines three mentioned long-short strategies into a single overlay portfolio. The goal is to generate a strategy with an annualized target volatility of 10%, while the core portfolio remains invested in 1-month T-Bills.
+I construct a fund that combines three mentioned long-short strategies into a single satellite portfolio. The goal is to generate a strategy with an annualized target volatility of 10%, while the core portfolio remains invested in 1-month T-Bills.
 
 The fund return is defined as:
 Where:
