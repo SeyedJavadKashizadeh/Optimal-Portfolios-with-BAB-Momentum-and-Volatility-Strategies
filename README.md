@@ -20,6 +20,8 @@
 This project builds an optimal long-short satellite portfolio based on three empirical asset pricing strategies; Betting Against Beta (BAB), Momentum, and Idiosyncratic Volatility. 
 Using daily U.S. equity data from CRSP via WRDS (1970–2025), the portfolio is constructed using both equal-weighted and risk parity. The final fund targets a volatility of 10%. 
 
+---
+
 <!-- Data -->
 ## Data:
 
@@ -31,6 +33,7 @@ Using daily U.S. equity data from CRSP via WRDS (1970–2025), the portfolio is 
 - **Market Return**: Value-weighted CRSP market return
 - **Risk-Free Rate**: 1-month T-bill returns
 
+--- 
 <!-- Betting Against Beta -->
 ## Betting Against Beta:
 
@@ -64,6 +67,7 @@ The **Betting Against Beta (BAB)** strategy follows the methodology of *Frazzini
 - `β_L`, `β_H` are portfolio betas
 - `Rf` is the 1-month T-bill rate
 
+--- 
 ### Signal Summary Statistics:
 
 | Metric         | Value     |
@@ -123,6 +127,7 @@ The momentum strategy ranks stocks based on their historical performance, exclud
 
 ![Mom Strategy Plot](plots/mom_cum.png)
 
+---
 <!-- Idiosyncratic Volatility Strategy -->
 ## Idiosyncratic Volatility Strategy:
 
@@ -158,6 +163,7 @@ This strategy examines whether stocks with lower idiosyncratic volatility outper
 
 ![Idio_Vol Strategy Plot](plots/idio_vol_cum.png)
 
+---
 <!-- OPTIMAL FUND PORTFOLIO -->
 ## Optimal Fund Portfolio Return (STRAT):
 
@@ -184,6 +190,8 @@ Where:
 |-------------------|-------------|-------------------|--------------|
 | Equal Weight      | 0.1082      | 0.10              | 1.0821       |
 | Risk Parity       | 0.1112      | 0.10              | 1.1122       |
+
+The negative Sharpe Ratio highlights the cost of removing systematic industry exposure. 
 
 ### Accumulative Return of STRAT Without Annual Volatility Target:
 
